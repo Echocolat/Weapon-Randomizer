@@ -29,7 +29,7 @@ MOD_META = {
     "name": "Weapon Randomizer",
     "image": "",
     "url": "",
-    "desc": "",
+    "desc": "Randomizes standalone weapons, chest weapons and enemy weapons (except for Wizzrobes) at choice everywhere in the game.",
     "version": "1.0",
     "options": {},
     "depends": [],
@@ -198,7 +198,7 @@ def change_all_mainfield():
             f.write(file_data)
 
 def change_all_non_dlc_shrines():
-    for file in FILE_LIST['Base Packs']:
+    for file in FILE_LIST['Base packs']:
 
         file_data = util.get_game_file(file, aoc = False).read_bytes()
         file_data = change_pack(file_data, file)
@@ -237,9 +237,9 @@ def change_trials():
     for file in FILE_LIST['Trials files']:
 
         file_data = util.get_game_file(file, aoc = True).read_bytes()
-        file_data = change_pack(file_data, file)
+        file_data = change_map(file_data, file)
 
-        folder = os.path.join('Weapon Randomizer\\aoc\\0010\\Map\\AocField' + file[17:20])
+        folder = os.path.join('Weapon Randomizer\\aoc\\0010\\Map\\AocField\\' + file[17:20])
         os.makedirs(folder, exist_ok = True)
 
         with open('Weapon Randomizer\\aoc\\0010\\' + file, 'wb') as f:
