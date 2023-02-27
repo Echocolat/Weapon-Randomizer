@@ -18,6 +18,27 @@ class Generator:
     bigendian: bool = True
     verbose: bool = False
 
+RULES = str('[Definition]\n' + 
+'titleIds = 00050000101C9300,00050000101C9400,00050000101C9500\n' +
+'name = Weapon Randomizer\n' + 
+'path = The Legend of Zelda: Breath of the Wild/Mods/Weapon Randomizer\n' +
+'description = Randomizes standalone weapons, chest weapons and enemy weapons (except for Wizzrobes) at choice everywhere in the game.\n' +
+'version = 7')
+
+MOD_META = {
+    "name": "Weapon Randomizer",
+    "image": "",
+    "url": "",
+    "desc": "",
+    "version": "1.0",
+    "options": {},
+    "depends": [],
+    "showCompare": False,
+    "showConvert": False,
+    "platform": "wiiu" if util.get_settings("wiiu") == True else "switch",
+    "id": ""
+}
+
 #Importing all configuration files
 
 with open('config.json') as config:
@@ -83,7 +104,7 @@ def to_oead(obj):
 def change_actor(config_data):
 
     actor_name = config_data['UnitConfigName']
-    if 'Enemy_' in actor_name and CONFIG['enemies']:
+    if 'Enemy_' in actor_name and CONFIG['enemies'] and not 'Wizzrobe' in actor_name:
 
         if '!Parameters' in config_data:
             for parameter in config_data['!Parameters']:
@@ -164,14 +185,97 @@ def change_pack(data, pack_name):
 
 #Functions to operate the changes
 
-def randomize_all_mainfield():
+def change_all_mainfield():
     for file in FILE_LIST['MainField files']:
         
-        file_data = util.get_game_file(file, aoc=False).read_bytes()
+        file_data = util.get_game_file(file, aoc = False).read_bytes()
         file_data = change_map(file_data, file)
 
-        folder = os.path.join('Weapon Randomizer\\content\\Map\\MainField\\'+file[18:21])
-        os.makedirs(folder, exist_ok=True)
+        folder = os.path.join('Weapon Randomizer\\content\\Map\\MainField\\' + file[18:21])
+        os.makedirs(folder, exist_ok = True)
 
-        with open('Weapon Randomizer\\content\\'+file,'wb') as f:
+        with open('Weapon Randomizer\\content\\' + file,'wb') as f:
             f.write(file_data)
+
+def change_all_non_dlc_shrines():
+    for file in FILE_LIST['Base Packs']:
+
+        file_data = util.get_game_file(file, aoc = False).read_bytes()
+        file_data = change_pack(file_data, file)
+
+        folder = os.path.join('Weapon Randomizer\\content\\Pack')
+        os.makedirs(folder, exist_ok = True)
+
+        with open('Weapon Randomizer\\content\\' + file, 'wb') as f:
+            f.write(file_data)
+
+def change_all_dlc_shrines():
+    for file in FILE_LIST['DLC shrine packs']:
+
+        file_data = util.get_game_file(file, aoc = True).read_bytes()
+        file_data = change_pack(file_data, file)
+
+        folder = os.path.join('Weapon Randomizer\\aoc\\0010\\Pack')
+        os.makedirs(folder, exist_ok = True)
+
+        with open('Weapon Randomizer\\aoc\\0010\\' + file, 'wb') as f:
+            f.write(file_data)
+
+def change_divine_beasts():
+    for file in FILE_LIST['Divine Beast packs']:
+
+        file_data = util.get_game_file(file, aoc = True).read_bytes()
+        file_data = change_pack(file_data, file)
+
+        folder = os.path.join('Weapon Randomizer\\aoc\\0010\\Pack')
+        os.makedirs(folder, exist_ok = True)
+
+        with open('Weapon Randomizer\\aoc\\0010\\' + file, 'wb') as f:
+            f.write(file_data)
+
+def change_trials():
+    for file in FILE_LIST['Trials files']:
+
+        file_data = util.get_game_file(file, aoc = True).read_bytes()
+        file_data = change_pack(file_data, file)
+
+        folder = os.path.join('Weapon Randomizer\\aoc\\0010\\Map\\AocField' + file[17:20])
+        os.makedirs(folder, exist_ok = True)
+
+        with open('Weapon Randomizer\\aoc\\0010\\' + file, 'wb') as f:
+            f.write(file_data)
+
+def create_rules():
+    with open('Weapon Randomizer\\rules.txt', 'w') as f:
+        f.write(RULES)
+
+def create_meta():
+    with open('Weapon Randomizer\\info.json', 'w') as f:
+        f.write(json.dumps(MOD_META, indent = 2))
+
+def main():
+
+    if input(WELCOME) != 'y':
+        print('Cancelled randomization')
+
+    else:
+        change_all_mainfield()
+        change_all_non_dlc_shrines()
+        change_all_dlc_shrines()
+        change_divine_beasts()
+        change_trials()
+        create_rules()
+        create_meta()
+        bootup_path = Path("Weapon Randomizer\\content\\Pack\\Bootup.pack")
+        bootup_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(util.get_game_file("Pack/Bootup.pack"), bootup_path)
+        flag_util.generate(Generator(util.get_settings("wiiu")))
+        if CONFIG['autoinstall']:
+            mod_path = Path('Weapon Randomizer\\info.json')
+            mod_meta = MOD_META
+            mod_path.write_text(json.dumps(mod_meta))
+            install_mod(mod=mod_path, merge_now=True)
+            link_master_mod()
+
+if __name__ == '__main__':
+    main()
