@@ -60,7 +60,7 @@ SPEARS = ['Weapon_Spear_' + WEAPONS['Spear'][i] for i in range(len(WEAPONS['Spea
 SWORDS = ['Weapon_Sword_' + WEAPONS['Sword'][i] for i in range(len(WEAPONS['Sword']))]
 
 WELCOME = str(
-    + "Your settings are as follows: \n"
+    "Your settings are as follows: \n"
     + "\n"
     + "Randomize enemy weapons: " + str(CONFIG['enemies'])
     + "\nRandomize chest weapons: " + str(CONFIG['chests'])
