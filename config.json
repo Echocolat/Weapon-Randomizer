@@ -1,0 +1,6 @@
+{
+    "enemies": true,
+    "standalone": true,
+    "chests": true,
+    "autoinstall": false
+}
